@@ -11,10 +11,12 @@ namespace ConsultasDBRomss.Services
     public class RecordServices : IRecordServices
     {
         XMLHelper xmlHelper;
+        RomssQuery romssQuery;
 
         public RecordServices()
         {
             this.xmlHelper = new XMLHelper();
+            this.romssQuery = new RomssQuery();
         }
 
         public String XMLResponse(String strXML)
