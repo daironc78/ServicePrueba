@@ -34,7 +34,7 @@ namespace ConsultasDBRomss.Services
                         new SqlParameter("@DateIni", SqlDbType.DateTime) { Value = Convert.ToDateTime(XMLRomssQuery.FechaInicial) },
                         new SqlParameter("@DateFin", SqlDbType.DateTime) { Value = Convert.ToDateTime(XMLRomssQuery.FechaFinal) }
                     };
-                    SqlCommand response = con.processProcedure(XMLRomssQuery.SQLName, parameters);
+                    DataTable resonseDB = con.processProcedure(XMLRomssQuery.SQLName, parameters);
                     strXMLResponse = "";
                 }
                 else

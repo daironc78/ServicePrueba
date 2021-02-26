@@ -63,7 +63,7 @@ namespace ConsultasDBRomss.Connection
             return this.db != null;
         }
 
-        public SqlCommand processProcedure(String NameProcedure, params IDataParameter[] sqlParams)
+        public DataTable processProcedure(String NameProcedure, params IDataParameter[] sqlParams)
         {                        
             try
             {                
@@ -79,15 +79,22 @@ namespace ConsultasDBRomss.Connection
                             dCmd.Parameters.Add(param);
                         }
                     }
-                    if (dCmd.ExecuteNonQuery() > 0) 
+                    SqlDataReader responseSQL = dCmd.ExecuteReader();
+                    DataTable dataTable = new DataTable();
+                    dataTable.Load(responseSQL);
+                    if (dataTable.Rows.Count > 0) 
                     {
                         this.db.Close();
-                        return dCmd; 
-                    } else { return null; }                    
+                        return dataTable; 
+                    } 
+                    else { 
+                        return null; 
+                    }                    
                 }                                                           
             }
             catch (Exception ex)
             {
+                return null;
                 Log.save(this, ex, null);
                 throw new Exception(ex.Message);
             }
