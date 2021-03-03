@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace ConsultasDBRomss
@@ -16,13 +12,25 @@ namespace ConsultasDBRomss
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+                defaults: new { controller = "Romss", action = "Index", id = UrlParameter.Optional }
             );
 
             routes.MapRoute(
                 name: "api",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Romss", id = UrlParameter.Optional }
+                defaults: new { controller = "Romss", action = "ConsultData", id = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
+                name: "apiDecode",
+                url: "{controller}/{action}/{id}",
+                defaults: new { controller = "Romss", action = "Decode", id = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
+                name: "apiEncode",
+                url: "{controller}/{action}/{id}",
+                defaults: new { controller = "Romss", action = "Encode", id = UrlParameter.Optional }
             );
         }
     }

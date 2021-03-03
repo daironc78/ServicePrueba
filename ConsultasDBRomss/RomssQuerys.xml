@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<RomssQuerys>
+  <querys>
+    <VolumenesNoOficialesVenta>SELECT Employees.Country, Employees.LastName, Employees.FirstName, Orders.ShippedDate, Orders.OrderID, "Order Subtotals".Subtotal AS SaleAmount FROM Employees INNER JOIN (Orders INNER JOIN "Order Subtotals" ON Orders.OrderID = "Order Subtotals".OrderID) ON Employees.EmployeeID = Orders.EmployeeID WHERE Orders.ShippedDate Between @fechaini And @fechafin</VolumenesNoOficialesVenta>
+    <Compras>SELECT Employees.Country, Employees.LastName, Employees.FirstName, Orders.ShippedDate, Orders.OrderID, "Order Subtotals".Subtotal AS SaleAmount FROM Employees INNER JOIN (Orders INNER JOIN "Order Subtotals" ON Orders.OrderID = "Order Subtotals".OrderID) ON Employees.EmployeeID = Orders.EmployeeID WHERE Employees.LastName IN ([FECHAS])</Compras>
+    <Ventas>SELECT Employees.Country, Employees.LastName, Employees.FirstName, Orders.ShippedDate, Orders.OrderID, "Order Subtotals".Subtotal AS SaleAmount FROM Employees INNER JOIN (Orders INNER JOIN "Order Subtotals" ON Orders.OrderID = "Order Subtotals".OrderID) ON Employees.EmployeeID = Orders.EmployeeID WHERE Orders.OrderID IN ([FECHAS])</Ventas>
+    <Otros>SELECT Employees.Country, Employees.LastName, Employees.FirstName, Orders.ShippedDate, Orders.OrderID, "Order Subtotals".Subtotal AS SaleAmount FROM Employees INNER JOIN (Orders INNER JOIN "Order Subtotals" ON Orders.OrderID = "Order Subtotals".OrderID) ON Employees.EmployeeID = Orders.EmployeeID WHERE Employees.LastName IN ([FECHAS]) AND Orders.ShippedDate = @Fecha</Otros>
+  </querys>
+</RomssQuerys>

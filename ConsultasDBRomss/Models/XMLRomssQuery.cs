@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Xml.Serialization;
 
 namespace ConsultasDBRomss.Models
@@ -11,9 +9,7 @@ namespace ConsultasDBRomss.Models
     {
         [XmlElement("SQLNAME")]
         public String SQLName { get; set; }
-        [XmlElement("FECHAINICIAL")]
-        public String FechaInicial { get; set; }
-        [XmlElement("FECHAFINAL")]
-        public String FechaFinal { get; set; }
+        [XmlElement("PARAM")]
+        public List<Params> Params = new List<Params>();
     }
 }

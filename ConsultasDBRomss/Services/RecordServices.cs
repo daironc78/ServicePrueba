@@ -4,62 +4,81 @@ using ConsultasDBRomss.Utils;
 using System;
 using ConsultasDBRomss.Connection;
 using System.Data;
-using System.Data.SqlClient;
+using System.Xml;
+using System.Web;
 
 namespace ConsultasDBRomss.Services
 {
     public class RecordServices : IRecordServices
     {
-        XMLHelper xmlHelper;
-        RomssQuery romssQuery;
-
-        public RecordServices()
-        {
-            this.xmlHelper = new XMLHelper();
-            this.romssQuery = new RomssQuery();
-        }
-
         public String XMLResponse(String strXML)
         {
-            XMLRomssQuery XMLRomssQuery = new XMLRomssQuery();
+            XMLHelper xmlHelper = new XMLHelper();
+            ConnectDB con = new ConnectDB();
             String strXMLResponse;
+            string validacion = String.Empty;
             try
             {
-                XMLRomssQuery = this.xmlHelper.Deserialize<XMLRomssQuery>(strXML, "ROMSSQUERY");
-                if (validateObject(XMLRomssQuery))
-                {
-                    ConnectDB con = new ConnectDB();
-                    IDataParameter[] parameters = new IDataParameter[]
-                    {
-                        new SqlParameter("@DateIni", SqlDbType.DateTime) { Value = Convert.ToDateTime(XMLRomssQuery.FechaInicial) },
-                        new SqlParameter("@DateFin", SqlDbType.DateTime) { Value = Convert.ToDateTime(XMLRomssQuery.FechaFinal) }
-                    };
-                    DataTable resonseDB = con.processProcedure(XMLRomssQuery.SQLName, parameters);
-                    strXMLResponse = "";
-                }
-                else
-                {
-                    strXMLResponse = "";
-                }
+                XMLRomssQuery XMLRomssQuery = xmlHelper.Deserialize<XMLRomssQuery>(strXML, "ROMSSQUERY");
+                String query = XMLScripts(XMLRomssQuery.SQLName);
+                validacion = validateObject(XMLRomssQuery);
+                DataTable resonseDB = con.processQuery(query, XMLRomssQuery);
+                strXMLResponse = xmlHelper.Serialize(resonseDB);
+                strXMLResponse = strXMLResponse.Replace("DocumentElement", "DBRomss");
             }
             catch (Exception e)
             {
-                Log.save(this, e, null);
-                strXMLResponse  = "Ha ocurrido un error en la serializacion" + e.Message;
+                Log.save(this, e, validacion);
+                strXMLResponse = "Ha ocurrido un error en la serializacion" + e.Message;
             }
 
             return strXMLResponse;
         }
 
-        private bool validateObject(XMLRomssQuery XMLromssQuery)
+        private string XMLScripts(string queryRomss)
         {
-            int validados = 0;
-            if (XMLromssQuery.SQLName != String.Empty || XMLromssQuery.SQLName != null) { validados++; }
-            if (XMLromssQuery.FechaInicial != String.Empty || XMLromssQuery.FechaInicial != null) { validados++; }
-            if (XMLromssQuery.FechaFinal != String.Empty || XMLromssQuery.FechaFinal != null) { validados++; }
+            XmlDocument XMLDocument = new XmlDocument();
+            String Query = String.Empty;
+            string Route = HttpContext.Current.Server.MapPath("~/RomssQuerys.xml");
+            XMLDocument.Load(Route);
+            XmlNodeList RomssQuerys = XMLDocument.GetElementsByTagName("RomssQuerys");
+            XmlNodeList Querys = ((XmlElement)RomssQuerys[0]).GetElementsByTagName("querys");
+            foreach (XmlElement Script in Querys)
+            {
+                Query = Script.GetElementsByTagName(queryRomss).Item(0).InnerText;
+            }
+            return Query;
+        }
 
-            if (validados == 3) { return true; }
-            else { return false; }
+        private string validateObject(XMLRomssQuery XMLromssQuery)
+        {
+            String validatorResponse = String.Empty;
+            int validados = 0;
+            if (XMLromssQuery.SQLName != String.Empty || XMLromssQuery.SQLName != null)
+            {
+                validados++;
+            }
+            else
+            {
+                validatorResponse += "No se ingreso el SQLNAME, ";
+            }
+            foreach (var item in XMLromssQuery.Params)
+            {
+                if (item.Name != String.Empty || item.Name != null)
+                    validados++;
+                else
+                    validatorResponse += "No se ingreso el 'Name' nombre parametro, ";
+
+                if (item.Type != String.Empty || item.Type != null)
+                    validados++;
+                else
+                    validatorResponse += "No se ingreso el 'TYPE' Tipo parametro, ";
+
+            }
+            if (validados == 3)
+                return "OK";
+            else
+                return validatorResponse;
         }
     }
 }
