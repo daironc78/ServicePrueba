@@ -44,9 +44,8 @@ namespace ConsultasDBRomss.Services
             XmlNodeList RomssQuerys = XMLDocument.GetElementsByTagName("RomssQuerys");
             XmlNodeList Querys = ((XmlElement)RomssQuerys[0]).GetElementsByTagName("querys");
             foreach (XmlElement Script in Querys)
-            {
                 Query = Script.GetElementsByTagName(queryRomss).Item(0).InnerText;
-            }
+
             return Query;
         }
 
@@ -54,28 +53,31 @@ namespace ConsultasDBRomss.Services
         {
             String validatorResponse = String.Empty;
             int validados = 0;
-            if (XMLromssQuery.SQLName != String.Empty || XMLromssQuery.SQLName != null)
-            {
-                validados++;
-            }
-            else
-            {
+            int invalidadosParam = 0;
+            if (XMLromssQuery.SQLName == String.Empty || XMLromssQuery.SQLName == null)
                 validatorResponse += "No se ingreso el SQLNAME, ";
-            }
+            else
+                validados++;
+
             foreach (var item in XMLromssQuery.Params)
             {
-                if (item.Name != String.Empty || item.Name != null)
-                    validados++;
-                else
+                if (item.Name == String.Empty || item.Name == null)
+                {
+                    invalidadosParam++;
                     validatorResponse += "No se ingreso el 'Name' nombre parametro, ";
-
-                if (item.Type != String.Empty || item.Type != null)
-                    validados++;
+                }
                 else
-                    validatorResponse += "No se ingreso el 'TYPE' Tipo parametro, ";
+                    validados++;
 
+                if (item.Type == String.Empty || item.Type == null)
+                {
+                    invalidadosParam++;
+                    validatorResponse += "No se ingreso el 'TYPE' Tipo parametro, ";
+                }
+                else
+                    validados++;
             }
-            if (validados == 3)
+            if (invalidadosParam < 0)
                 return "OK";
             else
                 return validatorResponse;
