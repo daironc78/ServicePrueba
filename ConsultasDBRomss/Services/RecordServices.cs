@@ -11,6 +11,7 @@ namespace ConsultasDBRomss.Services
 {
     public class RecordServices : IRecordServices
     {
+        string MessageError = String.Empty;
         public String XMLResponse(String strXML)
         {
             XMLHelper xmlHelper = new XMLHelper();
@@ -21,23 +22,29 @@ namespace ConsultasDBRomss.Services
             {
                 XMLRomssQuery XMLRomssQuery = xmlHelper.Deserialize<XMLRomssQuery>(strXML, "ROMSSQUERY");
                 String query = XMLScripts(XMLRomssQuery.SQLName);
-                validacion = validateObject(XMLRomssQuery);
-                DataTable resonseDB = con.processQuery(query, XMLRomssQuery);
-                if (resonseDB.Rows.Count > 0)
+                if (query != String.Empty)
                 {
-                    strXMLResponse = xmlHelper.Serialize(resonseDB);
-                    strXMLResponse = strXMLResponse.Replace("DocumentElement", "DBRomss");
+                    validacion = validateObject(XMLRomssQuery);
+                    DataTable resonseDB = con.processQuery(query, XMLRomssQuery);
+                    if (resonseDB.Rows.Count > 0)
+                    {
+                        strXMLResponse = xmlHelper.Serialize(resonseDB);
+                        strXMLResponse = strXMLResponse.Replace("DocumentElement", "DBRomss");
+                    }
+                    else
+                    {
+                        strXMLResponse = "<DBRomss></DBRomss>";
+                    }
                 }
                 else
                 {
-                    strXMLResponse = "<DBRomss></DBRomss>";
+                    strXMLResponse = "<DBRomss><CodeError>-1</CodeError><MessageError>" + MessageError + "</MessageError></DBRomss>";
                 }
-                
             }
             catch (Exception e)
             {
                 Log.save(this, e, validacion);
-                strXMLResponse = "Ha ocurrido un error en la serializacion" + e.Message;
+                strXMLResponse = "<DBRomss><CodeError>-1</CodeError><MessageError>ValidacionMessage: " + validacion + ", Error Message: " + e.Message + "</MessageError></DBRomss>";
             }
 
             return strXMLResponse;
@@ -51,8 +58,17 @@ namespace ConsultasDBRomss.Services
             XMLDocument.Load(Route);
             XmlNodeList RomssQuerys = XMLDocument.GetElementsByTagName("RomssQuerys");
             XmlNodeList Querys = ((XmlElement)RomssQuerys[0]).GetElementsByTagName("querys");
-            foreach (XmlElement Script in Querys)
-                Query = Script.GetElementsByTagName(queryRomss).Item(0).InnerText;
+            try
+            {
+                foreach (XmlElement Script in Querys)
+                    Query = Script.GetElementsByTagName(queryRomss).Item(0).InnerText;
+            }
+            catch(Exception e)
+            {
+                Query = String.Empty;
+                MessageError = "Error al leer el item '" + queryRomss + "' en el archivo 'RomssQuerys.xml'";
+                Log.save(this, e, "Error al leer el item '" + queryRomss + "' en el archivo 'RomssQuerys.xml'");
+            }
 
             return Query;
         }
@@ -69,26 +85,38 @@ namespace ConsultasDBRomss.Services
 
             foreach (var item in XMLromssQuery.Params)
             {
+                int posicion = 1;
                 if (item.Name == String.Empty || item.Name == null)
                 {
                     invalidadosParam++;
-                    validatorResponse += "No se ingreso el 'Name' nombre parametro, ";
+                    validatorResponse += "No se ingreso el 'NAME' nombre parametro PARAM: " + posicion + ", ";
                 }
                 else
+                {
                     validados++;
+                }
 
                 if (item.Type == String.Empty || item.Type == null)
                 {
                     invalidadosParam++;
-                    validatorResponse += "No se ingreso el 'TYPE' Tipo parametro, ";
+                    validatorResponse += "No se ingreso el 'TYPE' Tipo parametro, PARAM: " + posicion + ", ";
                 }
                 else
+                {
                     validados++;
+                }
+
+                posicion++;
             }
+
             if (invalidadosParam < 0)
+            {
                 return "OK";
+            }
             else
+            {
                 return validatorResponse;
+            }
         }
     }
 }
