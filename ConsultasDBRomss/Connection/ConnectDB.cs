@@ -115,7 +115,7 @@ namespace ConsultasDBRomss.Connection
                     }
                     else
                     {
-                        return null;
+                        return dataTable;
                     }
                 }
             }

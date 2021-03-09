@@ -23,8 +23,16 @@ namespace ConsultasDBRomss.Services
                 String query = XMLScripts(XMLRomssQuery.SQLName);
                 validacion = validateObject(XMLRomssQuery);
                 DataTable resonseDB = con.processQuery(query, XMLRomssQuery);
-                strXMLResponse = xmlHelper.Serialize(resonseDB);
-                strXMLResponse = strXMLResponse.Replace("DocumentElement", "DBRomss");
+                if (resonseDB.Rows.Count > 0)
+                {
+                    strXMLResponse = xmlHelper.Serialize(resonseDB);
+                    strXMLResponse = strXMLResponse.Replace("DocumentElement", "DBRomss");
+                }
+                else
+                {
+                    strXMLResponse = "<DBRomss></DBRomss>";
+                }
+                
             }
             catch (Exception e)
             {
