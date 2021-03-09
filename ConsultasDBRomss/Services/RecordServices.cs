@@ -25,26 +25,37 @@ namespace ConsultasDBRomss.Services
                 if (query != String.Empty)
                 {
                     validacion = validateObject(XMLRomssQuery);
-                    DataTable resonseDB = con.processQuery(query, XMLRomssQuery);
-                    if (resonseDB.Rows.Count > 0)
+                    if (validacion == "OK")
                     {
-                        strXMLResponse = xmlHelper.Serialize(resonseDB);
-                        strXMLResponse = strXMLResponse.Replace("DocumentElement", "DBRomss");
+                        DataTable resonseDB = con.processQuery(query, XMLRomssQuery);
+                        if (resonseDB == null)
+                        {
+                            strXMLResponse = "<MessageError>Error al realizar la consulta por favor validar</MessageError>";
+                        }
+                        else if (resonseDB.Rows.Count > 0)
+                        {
+                            strXMLResponse = xmlHelper.Serialize(resonseDB);
+                            strXMLResponse = strXMLResponse.Replace("DocumentElement", "DBRomss");
+                        }
+                        else
+                        {
+                            strXMLResponse = "<DBRomss></DBRomss>";
+                        }
                     }
                     else
                     {
-                        strXMLResponse = "<DBRomss></DBRomss>";
+                        strXMLResponse = "<MessageError>ValidacionMessage: " + validacion + "</MessageError>";
                     }
                 }
                 else
                 {
-                    strXMLResponse = "<DBRomss><CodeError>-1</CodeError><MessageError>" + MessageError + "</MessageError></DBRomss>";
+                    strXMLResponse = "<MessageError>" + MessageError + "</MessageError>";
                 }
             }
             catch (Exception e)
             {
                 Log.save(this, e, validacion);
-                strXMLResponse = "<DBRomss><CodeError>-1</CodeError><MessageError>ValidacionMessage: " + validacion + ", Error Message: " + e.Message + "</MessageError></DBRomss>";
+                strXMLResponse = "<MessageError>ValidacionMessage: " + validacion + ", Error Message: " + e.Message + "</MessageError>";
             }
 
             return strXMLResponse;
@@ -79,13 +90,18 @@ namespace ConsultasDBRomss.Services
             int validados = 0;
             int invalidadosParam = 0;
             if (XMLromssQuery.SQLName == String.Empty || XMLromssQuery.SQLName == null)
+            {
                 validatorResponse += "No se ingreso el SQLNAME, ";
+            }
             else
+            {
                 validados++;
+            }
 
+            int posicion = 1;
             foreach (var item in XMLromssQuery.Params)
             {
-                int posicion = 1;
+                
                 if (item.Name == String.Empty || item.Name == null)
                 {
                     invalidadosParam++;
@@ -109,7 +125,7 @@ namespace ConsultasDBRomss.Services
                 posicion++;
             }
 
-            if (invalidadosParam < 0)
+            if (invalidadosParam <= 0)
             {
                 return "OK";
             }
